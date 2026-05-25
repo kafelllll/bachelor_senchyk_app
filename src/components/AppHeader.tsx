@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Bell, Leaf, User } from 'lucide-react';
+import { Bell, Leaf, Menu, User, X } from 'lucide-react';
 import { io } from 'socket.io-client';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { authService } from '../api/authService';
@@ -8,16 +8,18 @@ import { messageService } from '../api/messageService';
 import { dispatchRatingsUpdated } from '../utils/ratingsEvents';
 
 type NavItem = {
+  key: 'home' | 'my-announcements' | 'matches' | 'chat' | 'exchanges';
   label: string;
-  to?: string;
+  to: string;
+  badge?: 'unread' | 'pending';
 };
 
 const navItems: NavItem[] = [
-  { label: 'Головна', to: '/listings' },
-  { label: 'Мої оголошення', to: '/my-announcements' },
-  { label: 'Мої збіги', to: '/matches' },
-  { label: 'Чат', to: '/messages' },
-  { label: 'Мої обміни', to: '/exchanges' },
+  { key: 'home', label: 'Головна', to: '/listings' },
+  { key: 'my-announcements', label: 'Мої оголошення', to: '/my-announcements' },
+  { key: 'matches', label: 'Мої збіги', to: '/matches' },
+  { key: 'chat', label: 'Чат', to: '/messages', badge: 'unread' },
+  { key: 'exchanges', label: 'Мої обміни', to: '/exchanges', badge: 'pending' },
 ];
 
 const SOCKET_BASE_URL =
@@ -31,6 +33,7 @@ export default function AppHeader() {
   const [userProfile, setUserProfile] = useState(() => authService.getUserProfile());
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingExchangeCount, setPendingExchangeCount] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const updateProfile = () => {
@@ -57,8 +60,6 @@ export default function AppHeader() {
       }
     };
 
-    loadUnreadCount();
-
     const loadPendingExchanges = async () => {
       try {
         const count = await exchangeService.getPendingCount();
@@ -71,7 +72,8 @@ export default function AppHeader() {
       }
     };
 
-    loadPendingExchanges();
+    void loadUnreadCount();
+    void loadPendingExchanges();
 
     return () => {
       isMounted = false;
@@ -118,10 +120,14 @@ export default function AppHeader() {
     };
   }, []);
 
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
   const avatar = userProfile?.avatar?.trim();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
+    <header className="sticky top-0 z-40 overflow-x-hidden border-b border-gray-200 bg-white">
       <div className="app-layout w-full px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-3">
@@ -133,35 +139,29 @@ export default function AppHeader() {
 
           <nav className="hidden flex-1 items-center justify-center gap-9 px-8 lg:flex xl:gap-11">
             {navItems.map((item) => {
-              const isActive = item.to ? location.pathname.startsWith(item.to) : false;
+              const isActive = location.pathname.startsWith(item.to);
               const className = isActive
                 ? 'text-base font-semibold tracking-[0.01em] text-green-700'
                 : 'text-base font-medium tracking-[0.01em] text-slate-600 transition hover:text-green-700';
 
-              if (item.to) {
-                return (
-                  <Link key={item.label} to={item.to} className={className}>
-                    <span className="relative">
-                      {item.label}
-                      {item.label === 'Чат' && unreadCount > 0 ? (
-                        <span className="absolute -right-5 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-emerald-600 px-1 text-[11px] font-semibold text-white">
-                          {unreadCount}
-                        </span>
-                      ) : null}
-                      {item.label === 'Мої обміни' && pendingExchangeCount > 0 ? (
-                        <span className="absolute -right-5 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-emerald-600 px-1 text-[11px] font-semibold text-white">
-                          {pendingExchangeCount}
-                        </span>
-                      ) : null}
-                    </span>
-                  </Link>
-                );
-              }
+              const badgeCount =
+                item.badge === 'unread'
+                  ? unreadCount
+                  : item.badge === 'pending'
+                    ? pendingExchangeCount
+                    : 0;
 
               return (
-                <a key={item.label} href="#" className={className}>
-                  {item.label}
-                </a>
+                <Link key={item.key} to={item.to} className={className}>
+                  <span className="relative">
+                    {item.label}
+                    {badgeCount > 0 ? (
+                      <span className="absolute -right-5 -top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-emerald-600 px-1 text-[11px] font-semibold text-white">
+                        {badgeCount}
+                      </span>
+                    ) : null}
+                  </span>
+                </Link>
               );
             })}
           </nav>
@@ -190,10 +190,64 @@ export default function AppHeader() {
                 <User className="h-5 w-5 text-green-700" />
               )}
             </button>
+
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+              className="rounded-lg p-2 transition hover:bg-gray-100 lg:hidden"
+              aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="mobile-nav-menu"
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-5 w-5 text-slate-700" />
+              ) : (
+                <Menu className="h-5 w-5 text-slate-700" />
+              )}
+            </button>
           </div>
         </div>
-      </div>
 
+        {isMobileMenuOpen ? (
+          <nav
+            id="mobile-nav-menu"
+            className="mt-3 flex flex-col gap-2 border-t border-gray-200 pt-3 lg:hidden"
+          >
+            {navItems.map((item) => {
+              const isActive = location.pathname.startsWith(item.to);
+              const className = isActive
+                ? 'rounded-lg bg-green-50 px-3 py-2 text-sm font-semibold text-green-700'
+                : 'rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-green-700';
+
+              const badgeCount =
+                item.badge === 'unread'
+                  ? unreadCount
+                  : item.badge === 'pending'
+                    ? pendingExchangeCount
+                    : 0;
+
+              return (
+                <Link key={item.key} to={item.to} className={className}>
+                  <span className="inline-flex items-center gap-2">
+                    <span>{item.label}</span>
+                    {badgeCount > 0 ? (
+                      <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-emerald-600 px-1 text-[11px] font-semibold text-white">
+                        {badgeCount}
+                      </span>
+                    ) : null}
+                  </span>
+                </Link>
+              );
+            })}
+            <Link
+              to="/create-listing"
+              className="mt-1 rounded-xl bg-gradient-to-r from-[#2e7d32] to-[#49b04d] px-4 py-2.5 text-center text-sm font-semibold text-white shadow-[0_8px_18px_rgba(76,175,80,0.25)] transition hover:opacity-95 md:hidden"
+            >
+              Створити оголошення
+            </Link>
+          </nav>
+        ) : null}
+      </div>
     </header>
   );
 }

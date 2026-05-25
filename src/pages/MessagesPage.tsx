@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, Send, Star, User } from 'lucide-react';
+import { ArrowLeft, Search, Send, Star, User } from 'lucide-react';
 import { io } from 'socket.io-client';
 
 import AppHeader from '../components/AppHeader';
@@ -777,8 +777,17 @@ export default function MessagesPage() {
     setExchangeSuccess(null);
   }, [activeConversation?.participant.id, pendingAnnouncementId]);
 
+  const handleBackToConversationList = () => {
+    setActiveConversation(null);
+    setMessages([]);
+    setMessageTarget(null);
+    setPendingAnnouncementId(null);
+    setPendingAnnouncementTitle(null);
+    clearChatSearchParams();
+  };
+
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen overflow-x-hidden bg-neutral-50">
       <AppHeader />
 
       {showDeleteModal && activeConversation ? (
@@ -813,9 +822,13 @@ export default function MessagesPage() {
         </div>
       ) : null}
 
-      <main className="app-layout w-full px-4 py-6 sm:px-6 lg:px-8 h-[calc(100vh-88px)]">
-        <div className="mx-auto grid h-full w-full max-w-[1452px] gap-6 lg:grid-cols-[340px_1fr]">
-          <aside className="relative z-10 flex h-full min-h-0 flex-col rounded-[24px] border border-gray-200 bg-white p-4 shadow-sm">
+      <main className="app-layout min-h-[calc(100vh-88px)] w-full overflow-x-hidden px-4 py-6 sm:px-6 lg:h-[calc(100vh-88px)] lg:px-8">
+        <div className="mx-auto grid w-full max-w-[1452px] overflow-x-hidden gap-6 lg:h-full lg:grid-cols-[340px_1fr]">
+          <aside
+            className={`relative z-10 min-h-0 flex-col rounded-[24px] border border-gray-200 bg-white p-4 shadow-sm lg:h-full ${
+              activeConversation ? 'hidden lg:flex' : 'flex'
+            }`}
+          >
             <div className="relative mb-4">
               <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
@@ -840,7 +853,7 @@ export default function MessagesPage() {
                 Діалоги відсутні. Напишіть користувачу через оголошення.
               </div>
             ) : (
-              <div className="flex flex-1 flex-col gap-3 overflow-y-auto">
+              <div className="flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto">
                 {visibleConversations.map((conversation: Conversation) => {
                   const isActive =
                     activeConversation &&
@@ -861,14 +874,14 @@ export default function MessagesPage() {
                       onClick={() => {
                         selectConversation(conversation);
                       }}
-                      className={`flex min-w-0 w-full flex-col rounded-2xl border px-4 py-3 text-left transition ${
+                      className={`flex min-w-0 w-full flex-col overflow-hidden rounded-2xl border px-4 py-3 text-left transition ${
                         isActive
                           ? 'border-green-300 bg-green-50'
                           : 'border-gray-200 bg-white hover:border-green-200 hover:bg-green-50/60'
                       }`}
                     >
-                      <div className="flex min-w-0 items-start justify-between gap-2">
-                        <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex w-full min-w-0 items-start justify-between gap-2">
+                        <div className="flex w-full min-w-0 flex-1 items-center gap-3 overflow-hidden">
                           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
                             {resolvedParticipant.avatar ? (
                               <img
@@ -880,7 +893,7 @@ export default function MessagesPage() {
                               <User className="h-4 w-4 text-emerald-700" />
                             )}
                           </div>
-                          <div className="min-w-0 flex-1">
+                          <div className="min-w-0 w-full flex-1">
                             <p className="text-clamp-1 text-base font-semibold text-slate-900">
                               {resolvedParticipant.name || 'Користувач'}
                             </p>
@@ -888,7 +901,7 @@ export default function MessagesPage() {
                               <Star className="h-4 w-4 shrink-0 fill-yellow-400 text-yellow-400" />
                               <span className="min-w-0 text-clamp-1">{ratingInfo.ratingText}</span>
                             </div>
-                            <p className="mt-1 text-clamp-1 text-sm text-slate-500">
+                            <p className="mt-1 text-clamp-2 text-sm leading-6 text-slate-500 break-words">
                               {conversationAnnouncement}
                             </p>
                           </div>
@@ -906,11 +919,23 @@ export default function MessagesPage() {
             )}
           </aside>
 
-          <section className="relative z-0 flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-sm">
-            <div className="border-b border-slate-100 px-6 py-4">
+          <section
+            className={`relative z-0 min-h-0 flex-col overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-sm lg:h-full ${
+              activeConversation ? 'flex' : 'hidden lg:flex'
+            }`}
+          >
+            <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
               {activeConversation ? (
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <button
+                      type="button"
+                      onClick={handleBackToConversationList}
+                      className="mb-1 inline-flex w-fit items-center gap-1 rounded-lg px-1 py-1 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 lg:hidden"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" />
+                      До списку
+                    </button>
                     <Link
                       to={`/users/${activeConversation.participant.id}`}
                       className="-m-2 block min-w-0 rounded-xl p-2 transition hover:bg-green-50/60"
@@ -947,12 +972,12 @@ export default function MessagesPage() {
                     </div>
                     </Link>
                   </div>
-                  <div className="flex items-center justify-end">
+                  <div className="flex w-full items-center justify-end sm:w-auto">
                     <button
                       type="button"
                       onClick={handleStartExchange}
                       disabled={!canStartExchange || isStartingExchange}
-                      className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold transition ${
+                      className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-xs font-semibold transition sm:w-auto sm:px-6 sm:text-sm ${
                         !canStartExchange || isStartingExchange
                           ? 'cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400'
                           : 'bg-gradient-to-r from-[#2e7d32] to-[#49b04d] text-white shadow-[0_8px_18px_rgba(76,175,80,0.25)] hover:opacity-95'
@@ -972,7 +997,7 @@ export default function MessagesPage() {
               )}
             </div>
 
-            <div className="flex min-h-0 flex-1 flex-col bg-slate-50 px-6 py-4">
+            <div className="flex min-h-0 flex-1 flex-col bg-slate-50 px-4 py-4 sm:px-6">
               {activeConversation ? (
                 isLoadingMessages ? (
                   <div className="flex flex-1 items-center justify-center text-sm text-slate-500">
@@ -996,7 +1021,7 @@ export default function MessagesPage() {
                           className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}
                         >
                           <div
-                            className={`max-w-[60%] rounded-2xl px-3 py-2.5 text-left text-sm shadow-sm break-words ${
+                            className={`max-w-[85%] rounded-2xl px-3 py-2.5 text-left text-sm shadow-sm break-words sm:max-w-[70%] lg:max-w-[60%] ${
                               isMine
                                 ? 'bg-green-100 text-green-900'
                                 : 'bg-white text-slate-700'
@@ -1032,7 +1057,7 @@ export default function MessagesPage() {
               ) : null}
             </div>
 
-            <div className="border-t border-slate-100 px-6 py-4">
+            <div className="border-t border-slate-100 px-4 py-4 sm:px-6">
               <div className="flex flex-col gap-2">
                 <textarea
                   rows={2}
@@ -1047,7 +1072,7 @@ export default function MessagesPage() {
                     type="button"
                     disabled={!canSend}
                     onClick={handleSend}
-                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#2e7d32] to-[#49b04d] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(76,175,80,0.25)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2e7d32] to-[#49b04d] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(76,175,80,0.25)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                   >
                     <Send className="h-4 w-4" />
                     Надіслати
@@ -1061,4 +1086,3 @@ export default function MessagesPage() {
     </div>
   );
 }
-

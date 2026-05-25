@@ -52,7 +52,7 @@ const careLabels: Record<CareLevel, string> = {
 };
 
 const cardsGridClass =
-  'mx-auto grid w-full max-w-[1452px] items-start gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(345px,100%),345px))]';
+  'mx-auto grid w-full max-w-[1452px] items-start justify-items-stretch gap-6 [grid-template-columns:minmax(0,1fr)] sm:justify-items-center sm:[grid-template-columns:repeat(auto-fit,minmax(min(345px,100%),345px))]';
 
 type ListingTypeFilter = 'all' | 'offering' | 'looking-for';
 type SortOption = 'best-match' | 'newest' | 'oldest' | 'name';
@@ -526,7 +526,6 @@ export default function MatchesPage() {
     </div>
   );
 }
-
 
 
 

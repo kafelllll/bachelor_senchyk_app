@@ -56,7 +56,7 @@ export default function ListingCard({
     ? `flex min-w-0 w-full gap-4 rounded-[24px] border bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
         variant === 'recommended' ? 'border-green-300' : 'border-gray-200'
       } ${isInactive ? 'opacity-70' : ''}`
-    : `listing-card group self-start flex min-w-0 w-full max-w-[345px] cursor-pointer flex-col overflow-hidden rounded-[24px] border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
+    : `listing-card group self-start flex min-w-0 w-full cursor-pointer flex-col overflow-hidden rounded-[24px] border bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md sm:max-w-[345px] ${
         variant === 'recommended' ? 'border-2 border-green-500' : 'border-gray-200'
       } ${isInactive ? 'opacity-70' : ''}`;
 

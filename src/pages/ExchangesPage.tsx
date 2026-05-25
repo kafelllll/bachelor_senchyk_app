@@ -1330,29 +1330,32 @@ function ExchangeCard({ exchange, currentUserId, ratingsByUserId, onStatusChange
   };
 
   return (
-    <article className="relative flex w-full gap-4 rounded-[24px] border border-gray-200 bg-white p-4 shadow-sm">
-      <span className={`absolute right-5 top-5 rounded-full px-4 py-2 text-sm font-semibold ${statusClasses[status]}`}>
+    <article className="relative flex w-full min-w-0 flex-col gap-4 rounded-[24px] border border-gray-200 bg-white p-4 shadow-sm sm:flex-row">
+      <span className={`hidden rounded-full px-4 py-2 text-sm font-semibold sm:absolute sm:right-5 sm:top-5 sm:inline-flex ${statusClasses[status]}`}>
         {statusLabels[status]}
       </span>
 
-      <div className="relative h-[220px] w-[220px] shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+      <div className="relative h-[220px] w-full shrink-0 overflow-hidden rounded-2xl bg-slate-100 sm:w-[220px]">
         {announcementImage ? (
           <img src={announcementImage} alt={announcement?.plantName} className="h-full w-full object-cover" />
         ) : null}
       </div>
 
-      <div className="flex flex-1 flex-col">
-        <div className="flex items-start justify-between gap-3 pr-32">
-          <h3 className="text-[17px] font-bold leading-tight text-slate-950">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 items-start justify-between gap-3 sm:pr-32">
+          <h3 className="min-w-0 break-words text-[17px] font-bold leading-tight text-slate-950">
             {announcement?.plantName ?? 'Оголошення без назви'}
           </h3>
           {typeLabel ? (
-            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+            <span className="shrink-0 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
               {typeLabel}
             </span>
           ) : null}
         </div>
 
+        <span className={`mt-2 inline-flex w-fit rounded-full px-4 py-2 text-sm font-semibold sm:hidden ${statusClasses[status]}`}>
+          {statusLabels[status]}
+        </span>
         <div className="mt-3 flex flex-wrap gap-2">
           {categoryLabel ? (
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">
@@ -1377,9 +1380,9 @@ function ExchangeCard({ exchange, currentUserId, ratingsByUserId, onStatusChange
         </div>
 
         <div className="mt-3 space-y-2 text-sm text-slate-500">
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <MapPin className="h-4 w-4" />
-            <span>{location}</span>
+            <span className="min-w-0 break-words">{location}</span>
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
@@ -1387,7 +1390,7 @@ function ExchangeCard({ exchange, currentUserId, ratingsByUserId, onStatusChange
           </div>
         </div>
 
-        <p className="mt-3 text-sm text-slate-600">
+        <p className="mt-3 break-words text-sm text-slate-600">
           {announcement?.description || 'Без опису'}
         </p>
 
@@ -1419,13 +1422,13 @@ function ExchangeCard({ exchange, currentUserId, ratingsByUserId, onStatusChange
           </div>
           </Link>
 
-          <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             {canAccept ? (
               <button
                 type="button"
                 onClick={() => handleAction('accepted')}
                 disabled={isUpdating}
-                className={`inline-flex h-10 min-w-[150px] items-center justify-center rounded-xl px-5 text-sm font-semibold transition ${
+                className={`inline-flex h-10 w-full items-center justify-center rounded-xl px-5 text-sm font-semibold transition sm:w-auto sm:min-w-[150px] ${
                   isUpdating
                     ? 'cursor-not-allowed bg-emerald-100 text-emerald-300'
                     : 'bg-gradient-to-r from-[#2e7d32] to-[#49b04d] text-white shadow-[0_8px_18px_rgba(76,175,80,0.25)] hover:opacity-95'
@@ -1440,7 +1443,7 @@ function ExchangeCard({ exchange, currentUserId, ratingsByUserId, onStatusChange
                             type="button"
                             onClick={handleConfirmCompletionAction}
                             disabled={isUpdating || awaitingOtherParticipant}
-                            className={`inline-flex h-10 min-w-[240px] items-center justify-center rounded-xl px-5 text-sm font-semibold transition ${
+                            className={`inline-flex h-10 w-full items-center justify-center rounded-xl px-5 text-sm font-semibold transition sm:w-auto sm:min-w-[240px] ${
                               isUpdating || awaitingOtherParticipant
                                 ? 'cursor-not-allowed border border-slate-200 text-slate-400'
                                 : 'bg-gradient-to-r from-[#2e7d32] to-[#49b04d] text-white shadow-[0_8px_18px_rgba(76,175,80,0.25)] hover:opacity-95'
@@ -1455,7 +1458,7 @@ function ExchangeCard({ exchange, currentUserId, ratingsByUserId, onStatusChange
                 type="button"
                 onClick={onRequestCancel}
                 disabled={isUpdating}
-                className={`inline-flex h-10 min-w-[120px] items-center justify-center rounded-xl px-5 text-sm font-semibold transition ${
+                className={`inline-flex h-10 w-full items-center justify-center rounded-xl px-5 text-sm font-semibold transition sm:w-auto sm:min-w-[120px] ${
                   isUpdating
                     ? 'cursor-not-allowed border border-slate-200 text-slate-400'
                     : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
@@ -1477,4 +1480,3 @@ function ExchangeCard({ exchange, currentUserId, ratingsByUserId, onStatusChange
     </article>
   );
 }
-

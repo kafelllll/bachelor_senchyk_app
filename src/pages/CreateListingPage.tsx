@@ -837,7 +837,7 @@ export default function CreateListingPage() {
                 Назва рослини
               </Label>
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex min-w-0 items-center gap-2">
                   <Input
                     id="plant-name"
                     value={plantName}
@@ -851,13 +851,13 @@ export default function CreateListingPage() {
                     }}
                     placeholder="Наприклад: Монстера Делікатесна"
                     maxLength={VALIDATION_LIMITS.plantName.max}
-                    className={`h-11 flex-1 rounded-xl bg-white px-4 text-sm transition-colors ${
+                    className={`h-11 min-w-0 flex-1 rounded-xl bg-white px-4 text-sm transition-colors ${
                       getPlantNameError()
                         ? 'border-2 border-red-500 focus:border-red-500'
                         : 'border-gray-300 focus:border-green-500'
                     }`}
                   />
-                  <span className="ml-2 text-xs text-slate-500">
+                  <span className="shrink-0 whitespace-nowrap text-xs text-slate-500">
                     {plantName.length}/{VALIDATION_LIMITS.plantName.max}
                   </span>
                 </div>
@@ -1145,7 +1145,7 @@ export default function CreateListingPage() {
                       type="button"
                       onClick={() => toggleTag(tag)}
                       className={cn(
-                        'min-w-[126px] rounded-xl border px-4 py-2 text-sm font-semibold transition-all',
+                        'max-w-full min-w-[110px] rounded-xl border px-4 py-2 text-center text-sm font-semibold leading-5 whitespace-normal break-words transition-all',
                         active
                           ? 'border-transparent bg-gradient-to-r from-[#2e7d32] to-[#49b04d] text-white shadow-[0_8px_18px_rgba(76,175,80,0.25)]'
                           : 'border-gray-300 bg-white text-slate-600 hover:border-green-500 hover:bg-green-50 hover:text-green-700'

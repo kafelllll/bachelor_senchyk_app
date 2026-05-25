@@ -699,7 +699,7 @@ export default function EditAnnouncementPage() {
               type="button"
               onClick={() => setListingType('offer')}
               className={cn(
-                'flex min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all',
+                'flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-center text-xs font-semibold transition-all sm:min-w-[140px]',
                 listingType === 'offer'
                   ? 'bg-green-600 text-white shadow-sm'
                   : 'text-slate-600 hover:text-green-700'
@@ -718,7 +718,7 @@ export default function EditAnnouncementPage() {
               type="button"
               onClick={() => setListingType('search')}
               className={cn(
-                'flex min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all',
+                'flex min-w-0 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-center text-xs font-semibold transition-all sm:min-w-[140px]',
                 listingType === 'search'
                   ? 'bg-green-600 text-white shadow-sm'
                   : 'text-slate-600 hover:text-green-700'
@@ -747,7 +747,7 @@ export default function EditAnnouncementPage() {
                   Назва рослини
                 </Label>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
                     <Input
                       value={plantName}
                       onChange={(event) => {
@@ -760,13 +760,13 @@ export default function EditAnnouncementPage() {
                       }}
                       placeholder="Наприклад, Монстера делікатесна"
                       maxLength={VALIDATION_LIMITS.plantName.max}
-                      className={`h-11 flex-1 rounded-xl bg-white px-4 text-sm transition-colors ${
+                      className={`h-11 min-w-0 flex-1 rounded-xl bg-white px-4 text-sm transition-colors ${
                         getPlantNameError()
                           ? 'border-2 border-red-500 focus:border-red-500'
                           : 'border-gray-300 focus:border-green-500'
                       }`}
                     />
-                    <span className="text-xs text-slate-500 whitespace-nowrap">
+                    <span className="shrink-0 whitespace-nowrap text-xs text-slate-500">
                       {plantName.length}/{VALIDATION_LIMITS.plantName.max}
                     </span>
                   </div>
@@ -953,7 +953,7 @@ export default function EditAnnouncementPage() {
                       type="button"
                       onClick={() => toggleTag(tag)}
                       className={cn(
-                        'min-w-[126px] rounded-xl border px-4 py-2 text-sm font-semibold transition-all',
+                        'max-w-full min-w-[110px] rounded-xl border px-4 py-2 text-center text-sm font-semibold leading-5 whitespace-normal break-words transition-all',
                         active
                           ? 'border-transparent bg-gradient-to-r from-[#2e7d32] to-[#49b04d] text-white shadow-[0_8px_18px_rgba(76,175,80,0.25)]'
                           : 'border-gray-300 bg-white text-slate-600 hover:border-green-500 hover:bg-green-50 hover:text-green-700'
@@ -1147,7 +1147,7 @@ export default function EditAnnouncementPage() {
                 type="button"
                 variant="outline"
                 onClick={handleCancelEdit}
-                className="h-11 w-full min-w-[200px] rounded-xl px-6 text-sm font-semibold shadow-none sm:w-auto"
+                className="h-11 w-full rounded-xl px-6 text-sm font-semibold shadow-none sm:min-w-[200px] sm:w-auto"
               >
                 Скасувати
               </Button>
@@ -1155,7 +1155,7 @@ export default function EditAnnouncementPage() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitLoading}
-                className="h-11 w-full min-w-[220px] rounded-xl px-6 from-[#2e7d32] to-[#49b04d] shadow-[0_8px_18px_rgba(76,175,80,0.25)] hover:opacity-95 sm:w-auto"
+                className="h-11 w-full rounded-xl px-6 from-[#2e7d32] to-[#49b04d] shadow-[0_8px_18px_rgba(76,175,80,0.25)] hover:opacity-95 sm:min-w-[220px] sm:w-auto"
               >
                 {submitLoading ? 'Збереження...' : 'Зберегти зміни'}
               </Button>
@@ -1166,4 +1166,3 @@ export default function EditAnnouncementPage() {
     </div>
   );
 }
-

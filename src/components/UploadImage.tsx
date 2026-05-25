@@ -132,17 +132,17 @@ const UploadImage = ({ onUpload, showPreview = true }: UploadImageProps) => {
         className="hidden"
       />
 
-      <div className="flex w-full items-center gap-3">
+      <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center">
         <label
           htmlFor="upload-image-input"
-          className="inline-flex h-11 cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-green-50"
+          className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-green-50 sm:w-auto"
         >
           Вибрати файл
         </label>
-        <div className="flex h-11 flex-1 items-center rounded-xl border border-dashed border-gray-200 bg-slate-50 px-4 text-sm text-slate-600">
+        <div className="flex h-11 min-w-0 w-full items-center rounded-xl border border-dashed border-gray-200 bg-slate-50 px-4 text-sm text-slate-600 sm:flex-1">
           {file ? `Обраний файл: ${file.name}` : "Файл не обрано"}
         </div>
-        <span className="text-xs font-semibold text-slate-500">
+        <span className="text-xs font-semibold text-slate-500 sm:shrink-0">
           {loading ? "Завантаження..." : "Автозавантаження після вибору"}
         </span>
       </div>

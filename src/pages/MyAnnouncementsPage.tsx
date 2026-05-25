@@ -82,7 +82,7 @@ const buildSearchText = (listing: Listing) => {
 };
 
 const cardsGridClass =
-  'mx-auto grid w-full max-w-[1452px] items-start gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(345px,100%),345px))]';
+  'mx-auto grid w-full max-w-[1452px] items-start justify-items-stretch gap-6 [grid-template-columns:minmax(0,1fr)] sm:justify-items-center sm:[grid-template-columns:repeat(auto-fit,minmax(min(345px,100%),345px))]';
 
 export default function MyAnnouncementsPage() {
   const navigate = useNavigate();
@@ -444,7 +444,7 @@ export default function MyAnnouncementsPage() {
                   <article
                     key={listing.id}
                     onClick={() => setSelectedListing(listing)}
-                    className={`group self-start flex min-w-0 w-full max-w-[345px] cursor-pointer flex-col overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
+                    className={`group self-start flex min-w-0 w-full cursor-pointer flex-col overflow-hidden rounded-[24px] border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md sm:max-w-[345px] ${
                       isInactive ? 'opacity-70' : ''
                     }`}
                   >
@@ -864,7 +864,6 @@ export default function MyAnnouncementsPage() {
     </div>
   );
 }
-
 
 
 

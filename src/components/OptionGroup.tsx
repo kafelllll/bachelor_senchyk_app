@@ -34,7 +34,7 @@ export default function OptionGroup<T extends string>({
               type="button"
               onClick={() => onChange(option.value)}
               className={cn(
-                'min-w-[126px] rounded-xl border px-4 py-2 text-sm font-semibold transition-all',
+                'max-w-full min-w-[110px] rounded-xl border px-4 py-2 text-center text-sm font-semibold leading-5 whitespace-normal break-words transition-all',
                 active
                   ? 'border-green-600 bg-gradient-to-r from-[#2e7d32] to-[#49b04d] text-white shadow-sm'
                   : 'border-gray-300 bg-white text-slate-600 hover:border-green-300 hover:bg-green-50 hover:text-green-700'
