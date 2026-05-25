@@ -25,3 +25,5 @@ coverage
 .env
 .env.*
 !.env.example
+!.env.development
+!.env.production
