@@ -29,8 +29,6 @@ jobs:
       - name: Upload to S3
         if: github.event_name == 'push'
         uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --acl public-read
         env:
           SOURCE_DIR: dist/
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
