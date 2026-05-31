@@ -7,6 +7,9 @@ type UploadImageProps = {
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000"
+).replace(/\/+$/, "");
 
 const UploadImage = ({ onUpload, showPreview = true }: UploadImageProps) => {
   const [file, setFile] = useState<File | null>(null);
@@ -48,7 +51,7 @@ const UploadImage = ({ onUpload, showPreview = true }: UploadImageProps) => {
 
     try {
       const presignedResponse = await fetch(
-        "http://localhost:3000/api/uploads/presigned-url",
+        `${API_BASE_URL}/api/uploads/presigned-url`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
