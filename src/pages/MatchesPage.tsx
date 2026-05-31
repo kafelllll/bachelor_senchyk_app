@@ -5,7 +5,7 @@ import { Search } from 'lucide-react';
 import AppHeader from '../components/AppHeader';
 import ListingCard from '../components/ListingCard';
 import { announcementService, type Category, type Size, type Condition, type CareLevel } from '../api/announcementService';
-import { exchangeService, type ExchangeHistory, type ExchangeItem } from '../api/exchangeService';
+import { exchangeService } from '../api/exchangeService';
 import { resolveRecommendations, type Recommendation, type ListingType } from '../utils/announcementMapping';
 import { getNetworkErrorMessage } from '../utils/networkError';
 import { authService } from '../api/authService';
@@ -75,35 +75,6 @@ const buildSearchText = (listing: Recommendation) => {
     .toLowerCase();
 };
 
-const extractAnnouncementIdFromExchange = (exchange: ExchangeItem): string | null => {
-  const nestedId = exchange.announcement?.id;
-  if (typeof nestedId === 'string' && nestedId.trim()) return nestedId;
-
-  const record = exchange as ExchangeItem & {
-    announcementId?: unknown;
-    announcement_id?: unknown;
-    announcement?: { _id?: unknown };
-  };
-  const fallbackId = record.announcementId ?? record.announcement_id ?? record.announcement?._id;
-  return typeof fallbackId === 'string' && fallbackId.trim() ? fallbackId : null;
-};
-
-const collectCompletedAnnouncementIds = (
-  history: ExchangeHistory | null,
-  mine: ExchangeItem[]
-) => {
-  const completedFromHistory = history?.completed ?? [];
-  const completedFromMine = mine.filter((item) => item.status === 'completed');
-  const unique = new Set<string>();
-
-  [...completedFromHistory, ...completedFromMine].forEach((item) => {
-    const announcementId = extractAnnouncementIdFromExchange(item);
-    if (announcementId) unique.add(announcementId);
-  });
-
-  return [...unique];
-};
-
 const listingTypeFilters: ListingTypeFilter[] = ['all', 'offering', 'looking-for'];
 const categoryFilters: Array<Category | 'all'> = ['all', 'indoor', 'succulent', 'other'];
 const sizeFilters: Array<Size | 'all'> = ['all', 'small', 'medium', 'large'];
@@ -128,7 +99,6 @@ export default function MatchesPage() {
   const [matches, setMatches] = useState<Recommendation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [completedAnnouncementIds, setCompletedAnnouncementIds] = useState<string[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(authService.getUserId());
   const [searchQuery, setSearchQuery] = useState(() => readMatchesFilters()?.searchQuery ?? '');
   const [listingType, setListingType] = useState<ListingTypeFilter>(() => {
@@ -283,39 +253,6 @@ export default function MatchesPage() {
     };
   }, []);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadCompletedAnnouncements = async () => {
-      if (!authService.getToken()) {
-        if (isMounted) setCompletedAnnouncementIds([]);
-        return;
-      }
-
-      const [historyResult, mineResult] = await Promise.allSettled([
-        exchangeService.history(),
-        exchangeService.listMine(),
-      ]);
-
-      if (!isMounted) return;
-
-      const history =
-        historyResult.status === 'fulfilled' ? historyResult.value : null;
-      const mine =
-        mineResult.status === 'fulfilled' && Array.isArray(mineResult.value)
-          ? mineResult.value
-          : [];
-
-      setCompletedAnnouncementIds(collectCompletedAnnouncementIds(history, mine));
-    };
-
-    loadCompletedAnnouncements();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [currentUserId]);
-
   const buildMessageLink = (listing: Recommendation) => {
     if (!listing.userId || listing.userId === currentUserId) return null;
     const params = new URLSearchParams({
@@ -363,7 +300,6 @@ export default function MatchesPage() {
 
   const applyFilters = (items: Recommendation[]) =>
     items.filter((listing) => {
-      if (completedAnnouncementIds.includes(listing.id)) return false;
       if (listing.status !== 'active') return false;
       if (effectiveTypeFilter !== 'all' && listing.type !== effectiveTypeFilter) return false;
       if (effectiveCategory !== 'all' && listing.category !== effectiveCategory) return false;
@@ -410,7 +346,6 @@ export default function MatchesPage() {
     effectiveCareLevel,
     effectiveCity,
     effectiveDistrict,
-    completedAnnouncementIds,
     effectiveKeywords,
     sortBy,
   ]);
@@ -591,5 +526,6 @@ export default function MatchesPage() {
     </div>
   );
 }
+
 
 

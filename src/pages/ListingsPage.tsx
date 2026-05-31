@@ -18,7 +18,7 @@ import {
   type Condition,
   type CareLevel,
 } from '../api/announcementService';
-import { exchangeService, type ExchangeHistory, type ExchangeItem } from '../api/exchangeService';
+import { exchangeService } from '../api/exchangeService';
 import { authService } from '../api/authService';
 import { resolveListings, resolveRecommendations, type BaseListing, type ListingType, type Recommendation } from '../utils/announcementMapping';
 import { getNetworkErrorMessage } from '../utils/networkError';
@@ -103,35 +103,6 @@ const buildSearchText = (listing: Listing) => {
     .toLowerCase();
 };
 
-const extractAnnouncementIdFromExchange = (exchange: ExchangeItem): string | null => {
-  const nestedId = exchange.announcement?.id;
-  if (typeof nestedId === 'string' && nestedId.trim()) return nestedId;
-
-  const record = exchange as ExchangeItem & {
-    announcementId?: unknown;
-    announcement_id?: unknown;
-    announcement?: { _id?: unknown };
-  };
-  const fallbackId = record.announcementId ?? record.announcement_id ?? record.announcement?._id;
-  return typeof fallbackId === 'string' && fallbackId.trim() ? fallbackId : null;
-};
-
-const collectCompletedAnnouncementIds = (
-  history: ExchangeHistory | null,
-  mine: ExchangeItem[]
-) => {
-  const completedFromHistory = history?.completed ?? [];
-  const completedFromMine = mine.filter((item) => item.status === 'completed');
-  const unique = new Set<string>();
-
-  [...completedFromHistory, ...completedFromMine].forEach((item) => {
-    const announcementId = extractAnnouncementIdFromExchange(item);
-    if (announcementId) unique.add(announcementId);
-  });
-
-  return [...unique];
-};
-
 const listingTypeFilters: ListingTypeFilter[] = ['all', 'offering', 'looking-for'];
 const categoryFilters: Array<Category | 'all'> = ['all', 'indoor', 'succulent', 'other'];
 const sizeFilters: Array<Size | 'all'> = ['all', 'small', 'medium', 'large'];
@@ -156,7 +127,6 @@ export default function ListingsPage() {
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [recommendationsLoading, setRecommendationsLoading] = useState(true);
   const [recommendationsError, setRecommendationsError] = useState<string | null>(null);
-  const [completedAnnouncementIds, setCompletedAnnouncementIds] = useState<string[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [showAiTip, setShowAiTip] = useState(false);
   const [searchQuery, setSearchQuery] = useState(() => readListingsFilters()?.searchQuery ?? '');
@@ -279,39 +249,6 @@ export default function ListingsPage() {
       isMounted = false;
     };
   }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadCompletedAnnouncements = async () => {
-      if (!authService.getToken()) {
-        if (isMounted) setCompletedAnnouncementIds([]);
-        return;
-      }
-
-      const [historyResult, mineResult] = await Promise.allSettled([
-        exchangeService.history(),
-        exchangeService.listMine(),
-      ]);
-
-      if (!isMounted) return;
-
-      const history =
-        historyResult.status === 'fulfilled' ? historyResult.value : null;
-      const mine =
-        mineResult.status === 'fulfilled' && Array.isArray(mineResult.value)
-          ? mineResult.value
-          : [];
-
-      setCompletedAnnouncementIds(collectCompletedAnnouncementIds(history, mine));
-    };
-
-    loadCompletedAnnouncements();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [currentUserId]);
 
   useEffect(() => {
     writeJsonStorageValue(STORAGE_KEYS.listingsFilters, {
@@ -471,22 +408,18 @@ export default function ListingsPage() {
   }, []);
 
   const otherListings = useMemo(() => {
-    const hidden = new Set(completedAnnouncementIds);
-    return listings.filter((listing) => {
-      if (hidden.has(listing.id)) return false;
-      if (!currentUserId) return true;
-      return listing.userId ? listing.userId !== currentUserId : true;
-    });
-  }, [completedAnnouncementIds, currentUserId, listings]);
+    if (!currentUserId) return listings;
+    return listings.filter((listing) =>
+      listing.userId ? listing.userId !== currentUserId : true
+    );
+  }, [currentUserId, listings]);
 
   const recommendedListings = useMemo(() => {
-    const hidden = new Set(completedAnnouncementIds);
     const filtered = recommendations.filter((item) =>
-      (currentUserId ? item.userId !== currentUserId : true) &&
-      !hidden.has(item.id)
+      currentUserId ? item.userId !== currentUserId : true
     );
     return [...filtered].sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0));
-  }, [completedAnnouncementIds, currentUserId, recommendations]);
+  }, [currentUserId, recommendations]);
 
   const applyFilters = (items: Listing[]) =>
     items.filter((listing) => {
